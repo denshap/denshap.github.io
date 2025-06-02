@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Простой WebAuthn</title>
+</head>
+<body>
+  <h1>WebAuthn: регистрация</h1>
+  <button onclick="register()">Создать ключ</button>
+
+  <script>
+    async function register() {
+      if (!window.PublicKeyCredential) {
+        alert("WebAuthn не поддерживается.");
+        return;
+      }
+
+      const publicKey = {
+        challenge: Uint8Array.from("simple-challenge", c => c.charCodeAt(0)),
+        rp: { name: "Пример Сайт" },
+        user: {
+          id: Uint8Array.from("user123", c => c.charCodeAt(0)),
+          name: "user@example.com",
+          displayName: "Пользователь"
+        },
+        pubKeyCredParams: [
+          { type: "public-key", alg: -7 } // ES256
+        ],
+        authenticatorSelection: {
+          userVerification: "required", // биометрия / PIN
+          authenticatorAttachment: "platform" // встроенное
+        },
+        timeout: 60000,
+        attestation: "none"
+      };
+
+      try {
+        const credential = await navigator.credentials.create({ publicKey });
+        console.log("Успешно:", credential);
+        alert("Ключ успешно создан!");
+      } catch (err) {
+        console.error(err);
+        alert("Ошибка: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
